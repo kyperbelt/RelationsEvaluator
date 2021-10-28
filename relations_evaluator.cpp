@@ -3,6 +3,7 @@
 #include <locale>
 #include <map>
 #include <algorithm>
+#include <sstream>
 
 using namespace std;
 
@@ -52,27 +53,59 @@ void runTest1(){
 
 
 void runTest2(){
-    cout << "tests2" << endl;
+    cout << "tests2 =================" << endl;
 
+    auto relationSetToString = [](vector<Tuple> r)->string{
+        stringstream s;
+        s << "R:{";
+        for(Tuple t: r){
+            s << " " << tupleToString(t);
+        }
+        s << " }";
+        return s.str();
+    };
 
-    string s = "a,b,c,d,e,f,g";
+    auto setToString = [](set<char> x)->string{
+        stringstream s;
+        s << "X:{";
+        for (char c : x){
+            s << " " << c;
+        }
+        s << " }";
+
+        return s.str();
+    };
+
+    string s = "a,b,c";
 
     set<char> s1 = parseSet(s);
 
-    cout << "set:" << endl;
-    for(char item: s1){
-        cout << item << endl;
-    }
+    // cout << "set:" << endl;
+    // for(char item: s1){
+    //     cout << item << endl;
+    // }
 
-    vector<Tuple> relations = parseRelations("(a,b) (c,d) (b,a)",s1);
+    vector<Tuple> relations = parseRelations("(a,b) (c,a) (a,c) (b,a)",s1);
 
-    cout << "relations: " << endl;
-    for(Tuple t: relations){
+    // cout << "relations: " << endl;
+    // for(Tuple t: relations){
+    //     cout << tupleToString(t) << endl;
+    // }
 
-        cout << tupleToString(t) << endl;
+    cout << "Symmetry Tests for " << setToString(s1) << endl;
+    cout << "is the set "<< relationSetToString(relations)<<" Symmetric? : " << (isSymmetric(relations, s1) ? "true" : "false") << endl;
+    relations = parseRelations("(a,a) (c,c) (b,b)", s1);
+    cout << "is the set "<< relationSetToString(relations)<<" Symmetric? : " << (isSymmetric(relations, s1) ? "true" : "false") << endl;
+    relations = parseRelations("(a,a),(c,c) (b,b) (b,c)", s1);
+    cout << "is the set "<< relationSetToString(relations)<<" Symmetric? : " << (isSymmetric(relations, s1) ? "true" : "false") << endl;
 
-    }
+    set<char> s2 = parseSet("0 1 2 3");
+    relations = parseRelations("(1,2) (3,3),(2,1),(1,1),(1,0)", s2);
 
+    cout << "AntiSymmetry Tests for " << setToString(s2) << endl;
+    cout << "is the set "<< relationSetToString(relations)<<" AntiSymmetric? : " << (isAntiSymmetric(relations, s2) ? "true" : "false") << endl;
+    relations = parseRelations("(3,3),(2,1),(1,1),(0,1),(0,0)", s2);
+    cout << "is the set "<< relationSetToString(relations)<<" AntiSymmetric? : " << (isAntiSymmetric(relations, s2) ? "true" : "false") << endl;
 }
 
 std::string tupleToString(Tuple t){
@@ -139,7 +172,12 @@ std::vector<Tuple> parseRelations(std::string input,std::set<char> &s){
                         if (left == '\0'){
                             left = c;
                         }else{
-                            result.push_back(Tuple{left,c});
+                            Tuple t = {left,c};
+                            if(!hasTuple(result, t)){ // if we already added this tuple then we dont want do it again
+                                result.push_back(t);
+                            }else{
+                                cerr << "Duplicate Tuple '" << tupleToString(t) << "' - did not add." << endl;
+                            }
                             left = '\0';
                             currentState = CLOSE;
                         }
@@ -164,3 +202,68 @@ std::vector<Tuple> parseRelations(std::string input,std::set<char> &s){
 
     return result;
 }
+
+
+bool isSymmetric(std::vector<Tuple> relations,std::set<char> s){
+
+    // using this set container to check
+    // the different elemetns we have checked for
+    // and by the end it should be the same size as our
+    // set s. Otherwise the symmetry does not apply since
+    // it will not be for all elements of our set.
+    set<char> checked;
+
+    for(Tuple t: relations){
+        if(!hasTuple(relations,Tuple{t.right,t.left}))
+            return false;
+        checked.insert(t.right);
+        checked.insert(t.left);
+    }
+    bool checkedAll = checked.size() == s.size();
+
+    if(!checkedAll){
+        cerr << "Forall elements condition unmet, not all elements in set were accounted for in the relation" << endl;
+    }
+
+    return checkedAll;
+}
+
+bool isAntiSymmetric(std::vector<Tuple> relations,std::set<char> s){
+    // same premise as in isSymmetric. We want to make sure we
+    // check all ements in the set S
+    set<char> checked;
+
+    for (Tuple t: relations){
+        if(hasTuple(relations,Tuple{.left = t.right, .right = t.left}) && t.left != t.right)
+            return false;
+        checked.insert(t.left);
+    }
+    bool checkedAll = checked.size() == s.size();
+
+    if(!checkedAll){
+        cerr << "Forall elements condition unmet, not all elements in set were accounted for in the relation" << endl;
+    }
+
+    return checkedAll;
+}
+
+bool hasTuple(std::vector<Tuple> relations, Tuple t){
+    for (Tuple n: relations){
+        if (n.left == t.left && n.right == t.right) return true;
+    }
+    return false;
+}
+
+
+// TODO: remember why I even made this function xD
+// std::vector<Tuple> getAllTuplesThatHave(std::vector<Tuple> relations, char c, bool right){
+//     vector<Tuple> results;
+
+//     for(Tuple t: relations){
+//         bool matched = (right && t.right == c) || t.left == c;
+//         if (matched)
+//             results.push_back(Tuple{t.left,t.right});
+//     }
+
+//     return results;
+// }
