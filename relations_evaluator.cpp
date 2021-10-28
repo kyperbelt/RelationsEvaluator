@@ -106,6 +106,9 @@ void runTest2(){
     cout << "is the set "<< relationSetToString(relations)<<" AntiSymmetric? : " << (isAntiSymmetric(relations, s2) ? "true" : "false") << endl;
     relations = parseRelations("(3,3),(2,1),(1,1),(0,1),(0,0)", s2);
     cout << "is the set "<< relationSetToString(relations)<<" AntiSymmetric? : " << (isAntiSymmetric(relations, s2) ? "true" : "false") << endl;
+    relations = parseRelations(" ", s2);
+    cout << "is the set "<< relationSetToString(relations)<<" AntiSymmetric? : " << (isAntiSymmetric(relations, s2) ? "true" : "false") << endl;
+
 }
 
 std::string tupleToString(Tuple t){
@@ -205,46 +208,19 @@ std::vector<Tuple> parseRelations(std::string input,std::set<char> &s){
 
 
 bool isSymmetric(std::vector<Tuple> relations,std::set<char> s){
-
-    // using this set container to check
-    // the different elemetns we have checked for
-    // and by the end it should be the same size as our
-    // set s. Otherwise the symmetry does not apply since
-    // it will not be for all elements of our set.
-    set<char> checked;
-
     for(Tuple t: relations){
         if(!hasTuple(relations,Tuple{t.right,t.left}))
             return false;
-        checked.insert(t.right);
-        checked.insert(t.left);
     }
-    bool checkedAll = checked.size() == s.size();
-
-    if(!checkedAll){
-        cerr << "Forall elements condition unmet, not all elements in set were accounted for in the relation" << endl;
-    }
-
-    return checkedAll;
+    return true;
 }
 
 bool isAntiSymmetric(std::vector<Tuple> relations,std::set<char> s){
-    // same premise as in isSymmetric. We want to make sure we
-    // check all ements in the set S
-    set<char> checked;
-
     for (Tuple t: relations){
         if(hasTuple(relations,Tuple{.left = t.right, .right = t.left}) && t.left != t.right)
             return false;
-        checked.insert(t.left);
     }
-    bool checkedAll = checked.size() == s.size();
-
-    if(!checkedAll){
-        cerr << "Forall elements condition unmet, not all elements in set were accounted for in the relation" << endl;
-    }
-
-    return checkedAll;
+    return true;
 }
 
 bool hasTuple(std::vector<Tuple> relations, Tuple t){
