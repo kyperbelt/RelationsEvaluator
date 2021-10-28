@@ -8,6 +8,9 @@
 .ccls-cache
 .ccls-cache/*
 
+target
+target/*
+
 # Compiled Object files
 *.slo
 *.lo
