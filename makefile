@@ -1,6 +1,6 @@
 # variables
 obj_dir = bin
-target_name = relations_eval
+target_name = reval
 target_dir = target
 objects = relations_evaluator.o
 

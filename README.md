@@ -1,6 +1,9 @@
 
 # RELATIONS EVALUATOR
 
-Relations Evaluator is a program created for the quick evaluation of relations over a set.
+Relations Evaluator is a program created for the quick evaluation of relations over a defined set. 
 
-Feature plans
+> :warning: ** Not currently implemented **
+example usage: `reval "<relation tuples>"  "<set>"`
+example output: `reflexive transitive`
+
